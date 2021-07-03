@@ -1,3 +1,4 @@
+from os import replace
 import pandas as pd
 import numpy as np
 import sys
@@ -15,7 +16,7 @@ def calcDistance(playlistData, trackID1, trackID2, features):
     return 0
 
 
-def evaluate(playlistData, songData, features, trackIDS={}):
+def evaluate(playlistData, songData, features, numNeighbors, trackIDS=pd.DataFrame()):
     '''
     evaluate: Returns a score of similarity between the song passed in and the rest of the playlist
 
@@ -23,22 +24,33 @@ def evaluate(playlistData, songData, features, trackIDS={}):
         - playlistData - Dataframe of all playlist data from playlist.csv
         - songData - data of the song being evaluated
         - features - list of features to evaluate on
+        - numNeighbors - number of points to average distance from
         - trackIDS - (optional)dictionary of trackids<string, bool> to exclude from playlistData
 
     Return Value:
-        Returns average distance of 5 closest playlist songs according to features passed in
+        Returns average distance of numNeighbors closest playlist songs according to features passed in
     '''
-    return 0
 
-def validate():
+
+def validate(playlistData, features, sampleSize, iterations, numNeighbors):
     '''
     validate: Returns a score based on the features and playlistData passed in
 
     Parameters:
         - playlistData - Dataframe of all playlist data from playlist.csv
         - features - list of the features to evaluate on
+        - sampleSize - number of rows to exclude and calculate for each evaluation
+        - iterations - number of samples to test
+        - numNeighbors - number of neighbors to calc average distance with
     '''
-    return 0
+    sumScore=0
+    for i in range(iterations):
+        score=0
+        excludeRows=playlistData.sample(n=sampleSize, replace=True)
+        for row in excludeRows:
+            score+=evaluate(playlistData=playlistData, songData=row, features=features, numNeighbors=numNeighbors, trackIDS=excludeRows)
+        sumScore+=score/sampleSize
+    return sumScore/iterations
 
 def featureSearch():
     '''
@@ -84,5 +96,4 @@ def featureSearch():
             break
 
     return currFeatures
-
     
