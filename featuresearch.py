@@ -1,9 +1,7 @@
 from os import replace
 import pandas as pd
 import numpy as np
-import sys
 import heapq
-import random
 
 ''' 
 TODO: Algorithm does not work currently because there are features that have near complete uniformitivity.
@@ -33,12 +31,9 @@ def calcDistance(playlistData, trackID1, trackID2, features):
     row2=playlistData.loc[playlistData['Track']==trackID2] #TODO: MUST MAKE IT SO row2.at[0, feature] accesses the correct index
     dist=0
     for feature in features:
-        print("ROW1 FEATURE: ", row1.at[0, feature], type(row1.at[0, feature]))
-        print("ROW2 FEATURE: ", row2, type(row2))
-        dist+=(row1.at[0, feature]-row2.at[0, feature])**2
-        print(dist)
-    print("CALCDISTANCE TYPE: ", type(dist))
-    return dist**.5
+        dist+=(row1.iloc[0][feature]-row2.iloc[0][feature])**2
+    dist**=.5
+    return dist
 
 def evaluate(playlistData, songData, features, numNeighbors, trackIDS=pd.DataFrame()):
     '''
@@ -60,7 +55,6 @@ def evaluate(playlistData, songData, features, numNeighbors, trackIDS=pd.DataFra
         if track[1] not in trackIDS.itertuples():
             dist=calcDistance(playlistData, track[1], songData[1], features)
             if len(neighbors)<numNeighbors:
-                print(type(dist))
                 heapq.heappush(neighbors, -1*dist)
             elif heapq.nsmallest(1, neighbors)[0] < -1*dist:
                 heapq.heappop(neighbors)
@@ -117,6 +111,7 @@ def featureSearch():
     print(playlistData)
     
     features = list(playlistData.columns.values[2:])
+    features.remove("Genres")
     #variables for feature search
     minScore=10**25
     currScore=10**25
@@ -148,7 +143,5 @@ def featureSearch():
         else:
             print("No better option found")
             break
-
+            
     return currFeatures
-    
-print(featureSearch())
